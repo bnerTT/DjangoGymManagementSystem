@@ -1,1 +1,1 @@
-# DjangoGymManagementSystem
+# Bem vindo ao projeto ct_fire!
