@@ -190,7 +190,7 @@ USE_L10N = True
 
 USE_TZ = False
 
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = '/admin/'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
