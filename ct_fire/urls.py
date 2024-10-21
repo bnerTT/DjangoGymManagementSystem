@@ -14,6 +14,7 @@ main_router = routers.DefaultRouter()
 urlpatterns = [
     path("admin/docs/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
+    path("", include("gerencia.urls")),
     path("", include("django.contrib.auth.urls")),
     path("", include("home.urls")),
     path("", include("django_app_novadata.urls")),

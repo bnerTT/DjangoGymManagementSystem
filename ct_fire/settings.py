@@ -14,8 +14,6 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'ct_fire.herokuapp.com',
-    'ct_fire.dokku.outboxsistemas.com',
 ]
 
 INTERNAL_IPS = [
@@ -55,6 +53,7 @@ INSTALLED_APPS = [
     'novadata_utils',
     'rest_framework',
     'widget_tweaks',
+    'gerencia',
 ]
 
 MIDDLEWARE = [
