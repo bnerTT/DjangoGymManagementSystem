@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'widget_tweaks',
     'gerencia',
+
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -67,7 +69,12 @@ MIDDLEWARE = [
 
     'home.middlewares.ModelAndAppNameMiddleware',
     'crum.CurrentRequestUserMiddleware',
+    
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 DEV = config('DEV', default=False, cast=bool)
 if DEV:

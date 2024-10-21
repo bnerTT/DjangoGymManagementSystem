@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Treino</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #000; /* Fundo preto */
+            color: #FFA500; /* Texto laranja */
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            color: #FFA500; /* Cor laranja para os rótulos */
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #FFA500; /* Borda laranja */
+            border-radius: 4px;
+            background-color: #333; /* Fundo escuro */
+            color: #FFF; /* Texto branco */
+        }
+        button {
+            background-color: #FFA500; /* Botão laranja */
+            color: #000; /* Texto preto no botão */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #FF8C00; /* Tom mais escuro de laranja ao passar o mouse */
+        }
+        h1, h3 {
+            color: #FFA500; /* Títulos em laranja */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Cadastrar Treino de Academia</h1>
+
+    <div class="form-group">
+        <label for="nome_treino">Nome do Treino:</label>
+        <input type="text" id="nome_treino" placeholder="Ex: Treino de Hipertrofia">
+    </div>
+
+    <h3>Adicionar Exercício</h3>
+    
+    <div class="form-group">
+        <label for="nome_exercicio">Nome do Exercício:</label>
+        <input type="text" id="nome_exercicio" placeholder="Ex: Supino Reto">
+    </div>
+
+    <div class="form-group">
+        <label for="series">Séries:</label>
+        <input type="number" id="series" min="1" placeholder="Ex: 4">
+    </div>
+
+    <div class="form-group">
+        <label for="repeticoes">Repetições:</label>
+        <input type="number" id="repeticoes" min="1" placeholder="Ex: 12">
+    </div>
+
+    <div class="form-group">
+        <label for="tempo_descanso">Descanso (em segundos):</label>
+        <input type="number" id="tempo_descanso" min="10" placeholder="Ex: 60">
+    </div>
+
+    <button id="submit-treino-btn">Cadastrar Treino</button>
+
+    <!-- Incluímos a biblioteca Axios via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        // Função para cadastrar o treino e enviar os dados para a API usando Axios via GET
+        async function cadastrarTreino() {
+            const nomeTreino = document.getElementById('nome_treino').value;
+            const nomeExercicio = document.getElementById('nome_exercicio').value;
+            const series = document.getElementById('series').value;
+            const repeticoes = document.getElementById('repeticoes').value;
+            const descanso = document.getElementById('tempo_descanso').value;
+
+            if (nomeTreino && nomeExercicio && series && repeticoes && descanso) {
+                try {
+                    // Fazendo uma requisição GET com Axios, enviando os dados como parâmetros na URL
+                    const response = await axios.get('http://localhost:8000/cadastrar-treinos/', {
+                        params: {
+                            nome_treino: nomeTreino,
+                            nome_exercicio: nomeExercicio,
+                            series: parseInt(series),
+                            repeticoes: parseInt(repeticoes),
+                            tempo_descanso: parseInt(descanso)
+                        }
+                    });
+
+                    if (response.status === 200 || response.status === 201) {
+                        console.log("Treino cadastrado com sucesso:", response.data);
+                        alert("Treino cadastrado com sucesso!");
+
+                        // Limpar os campos do formulário
+                        document.getElementById('nome_treino').value = '';
+                        document.getElementById('nome_exercicio').value = '';
+                        document.getElementById('series').value = '';
+                        document.getElementById('repeticoes').value = '';
+                        document.getElementById('tempo_descanso').value = '';
+                    } else {
+                        alert("Ocorreu um erro ao cadastrar o treino. Tente novamente.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao cadastrar o treino:", error);
+                    alert("Erro ao cadastrar o treino.");
+                }
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        }
+
+        // Adicionar evento ao botão para cadastrar o treino
+        document.getElementById('submit-treino-btn').addEventListener('click', cadastrarTreino);
+    </script>
+
+</body>
+</html>

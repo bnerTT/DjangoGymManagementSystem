@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino do Dia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #000; /* Fundo preto */
+            color: #FFA500; /* Texto laranja */
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            color: #FFA500; /* Cor laranja para os rótulos */
+        }
+        .treino-container {
+            margin-top: 20px;
+            color: #FFF; /* Texto branco para os treinos */
+        }
+        .treino-item {
+            border: 1px solid #FFA500; /* Borda laranja */
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #333; /* Fundo escuro para cada treino */
+            border-radius: 4px;
+        }
+        button {
+            background-color: #FFA500; /* Botão laranja */
+            color: #000; /* Texto preto no botão */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #FF8C00; /* Tom mais escuro de laranja ao passar o mouse */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Treino do Dia</h1>
+
+    <div id="treino-container" class="treino-container">
+        <!-- Os dados do treino serão exibidos aqui -->
+    </div>
+
+    <button id="bater-ponto-btn">Bater Ponto</button> <!-- Botão "Bater Ponto" -->
+
+    <!-- Incluímos a biblioteca Axios via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        // Função para extrair parâmetros da URL
+        function getAlunoIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('aluno_id'); // Captura o parâmetro aluno_id da URL
+        }
+
+        // Função para buscar o treino do dia
+        async function buscarTreinoDoDia() {
+            const alunoId = getAlunoIdFromUrl();
+
+            if (alunoId) {
+                try {
+                    // Fazendo a requisição GET para a API do treino do dia
+                    const response = await axios.get(`http://localhost:8000/alunos/${alunoId}/treino-dia/`);
+
+                    if (response.status === 200) {
+                        const treinoContainer = document.getElementById('treino-container');
+                        treinoContainer.innerHTML = ''; // Limpa o conteúdo anterior
+
+                        const dados = response.data;
+
+                        // Verifica se há mensagem de que não há treinos no dia
+                        if (dados.mensagem) {
+                            treinoContainer.innerHTML = `<p>${dados.mensagem}</p>`;
+                        } else {
+                            const nomeAluno = `<h2>Treino do Dia para: ${dados.nome_aluno}</h2>`;
+                            treinoContainer.innerHTML += nomeAluno;
+
+                            // Exibe os treinos do aluno
+                            dados.treino_do_dia.forEach((treino) => {
+                                const treinoItem = document.createElement('div');
+                                treinoItem.classList.add('treino-item');
+                                treinoItem.innerHTML = `
+                                    <strong>Exercício:</strong> ${treino.nome_exercicio}<br>
+                                    <strong>Séries:</strong> ${treino.series}<br>
+                                    <strong>Repetições:</strong> ${treino.repeticoes}<br>
+                                    <strong>Descanso:</strong> ${treino.tempo_descanso} segundos
+                                `;
+                                treinoContainer.appendChild(treinoItem);
+                            });
+                        }
+                    } else {
+                        alert("Erro ao buscar o treino. Tente novamente.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar o treino:", error);
+                    alert("Erro ao buscar o treino.");
+                }
+            } else {
+                alert("ID do aluno não encontrado na URL.");
+            }
+        }
+
+        // Função para bater ponto (enviar requisição POST para a API)
+        async function baterPonto() {
+            const alunoId = getAlunoIdFromUrl();
+
+            if (alunoId) {
+                try {
+                    // Fazendo a requisição POST para a API de bater ponto
+                    const response = await axios.post(`http://localhost:8000/alunos/${alunoId}/bater-ponto/`);
+
+                    if (response.status === 200) {
+                        alert("Ponto batido com sucesso!");
+                        console.log("Resposta da API:", response.data);
+                    } else {
+                        alert("Erro ao bater o ponto. Tente novamente.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao bater o ponto:", error);
+                    alert("Erro ao bater o ponto.");
+                }
+            } else {
+                alert("ID do aluno não encontrado na URL.");
+            }
+        }
+
+        // Chama a função para buscar o treino assim que a página carregar
+        window.onload = buscarTreinoDoDia;
+
+        // Adicionar evento ao botão "Bater Ponto"
+        document.getElementById('bater-ponto-btn').addEventListener('click', baterPonto);
+    </script>
+
+</body>
+</html>
