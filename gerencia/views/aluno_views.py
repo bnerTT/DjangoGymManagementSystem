@@ -5,14 +5,17 @@ from rest_framework.response import Response
 from ..models import Aluno
 from ..serializers import SerializersFactory
 
+from ..signals import PadraoRepository
+
 factory = SerializersFactory()
+repository = PadraoRepository()
 
 class AlunoListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Aluno.objects.all()
+    queryset = repository.get_all()
     serializer_class = factory.get_serializer('aluno')
 
 class AlunoRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Aluno.objects.all()
+    queryset = repository.get_all()
     serializer_class = factory.get_serializer('aluno')
 
 class BaterPontoAPIView(APIView):
@@ -20,15 +23,15 @@ class BaterPontoAPIView(APIView):
 
     def get(self, request, pk, *args, **kwargs):
         try:
-            aluno = Aluno.objects.get(pk=pk)
+            aluno = repository.get_by_id(pk)
             dias_inicial = aluno.dias_treino_inicial
             dias_restantes_semana = aluno.dias_treino - aluno.treinos_realizados_semana.count()
             if dias_restantes_semana > 0:
                 mensagem = f"Você tem {dias_restantes_semana} dias de treino restantes na semana."
-                dias_restantes_semana = Aluno.objects.update(dias_treino=dias_restantes_semana-1)
+                dias_restantes_semana = repository.update_alunos_treino(dias_treino=dias_restantes_semana-1)
             else:
                 mensagem = "Você já treinou todos os dias da semana."
-                dias_restantes_semana = Aluno.objects.update(dias_treino=dias_inicial)
+                dias_restantes_semana = repository.update_alunos_treino(dias_treino=dias_inicial)
 
             return Response({"mensagem": mensagem}, status=status.HTTP_200_OK)
         except Aluno.DoesNotExist:
@@ -36,7 +39,7 @@ class BaterPontoAPIView(APIView):
 
     def post(self, request, pk, *args, **kwargs):
         try:
-            aluno = Aluno.objects.get(pk=pk)
+            aluno = repository.get_by_id(pk)
             resposta = aluno.bater_ponto()
             aluno.save()
             return Response({"mensagem": resposta}, status=status.HTTP_200_OK)
@@ -46,7 +49,7 @@ class BaterPontoAPIView(APIView):
 class TreinoAlunoAPIView(APIView):
     def get(self, request, pk, *args, **kwargs):
         try:
-            aluno = Aluno.objects.get(pk=pk)
+            aluno = repository.get_by_id(pk)
             treinos = aluno.tipos_treinamento.all()
             treinos_serializer = factory.get_serializer('cadastrar_treinos')(treinos, many=True)
 
@@ -59,7 +62,7 @@ class TreinoAlunoAPIView(APIView):
         
     def post(self, request, pk, *args, **kwargs):
         try:
-            aluno = Aluno.objects.get(pk=pk)
+            aluno = repository.get_by_id(pk)
             treino = request.data.get('treino')
             aluno.tipos_treinamento.add(treino)
             return Response({"mensagem": "Treino adicionado com sucesso."}, status=status.HTTP_200_OK)
@@ -68,7 +71,7 @@ class TreinoAlunoAPIView(APIView):
 
     def delete(self, request, pk, *args, **kwargs):
         try:
-            aluno = Aluno.objects.get(pk=pk)
+            aluno = repository.get_by_id(pk)
             treino = request.data.get('treino')
             aluno.tipos_treinamento.remove(treino)
             return Response({"mensagem": "Treino removido com sucesso."}, status=status.HTTP_200_OK)
