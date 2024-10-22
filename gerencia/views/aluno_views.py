@@ -1,24 +1,22 @@
 from rest_framework import generics, status
-from ..models import Aluno
-from ..serializers import AlunoSerializer, CadastrarTreinosSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from ..models import Aluno
+from ..serializers import SerializersFactory
+
+factory = SerializersFactory()
 
 class AlunoListCreateAPIView(generics.ListCreateAPIView):
     queryset = Aluno.objects.all()
-    serializer_class = AlunoSerializer
-    # permission_classes = [IsAuthenticated]
+    serializer_class = factory.get_serializer('aluno')
 
 class AlunoRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Aluno.objects.all()
-    serializer_class = AlunoSerializer
-    # permission_classes = [IsAuthenticated]
+    serializer_class = factory.get_serializer('aluno')
 
 class BaterPontoAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
-    list_valores = []
 
     def get(self, request, pk, *args, **kwargs):
         try:
@@ -39,40 +37,31 @@ class BaterPontoAPIView(APIView):
     def post(self, request, pk, *args, **kwargs):
         try:
             aluno = Aluno.objects.get(pk=pk)
-
             resposta = aluno.bater_ponto()
-
             aluno.save()
-
             return Response({"mensagem": resposta}, status=status.HTTP_200_OK)
         except Aluno.DoesNotExist:
             return Response({"erro": "Aluno não encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        
-class TreinoAlunoAPIView(APIView):
-    # permission_classes = [IsAuthenticated]
 
+class TreinoAlunoAPIView(APIView):
     def get(self, request, pk, *args, **kwargs):
         try:
             aluno = Aluno.objects.get(pk=pk)
             treinos = aluno.tipos_treinamento.all()
-            treinos_serializer = CadastrarTreinosSerializer(treinos, many=True)
+            treinos_serializer = factory.get_serializer('cadastrar_treinos')(treinos, many=True)
 
             return Response({
                 "nome_aluno": aluno.nome,
                 "treinos": treinos_serializer.data
             }, status=status.HTTP_200_OK)
-            
         except Aluno.DoesNotExist:
             return Response({"erro": "Aluno não encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        
         
     def post(self, request, pk, *args, **kwargs):
         try:
             aluno = Aluno.objects.get(pk=pk)
             treino = request.data.get('treino')
-
             aluno.tipos_treinamento.add(treino)
-
             return Response({"mensagem": "Treino adicionado com sucesso."}, status=status.HTTP_200_OK)
         except Aluno.DoesNotExist:
             return Response({"erro": "Aluno não encontrado."}, status=status.HTTP_404_NOT_FOUND)
@@ -81,11 +70,7 @@ class TreinoAlunoAPIView(APIView):
         try:
             aluno = Aluno.objects.get(pk=pk)
             treino = request.data.get('treino')
-
             aluno.tipos_treinamento.remove(treino)
-
             return Response({"mensagem": "Treino removido com sucesso."}, status=status.HTTP_200_OK)
         except Aluno.DoesNotExist:
             return Response({"erro": "Aluno não encontrado."}, status=status.HTTP_404_NOT_FOUND)
-        
-
